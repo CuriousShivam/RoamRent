@@ -1,0 +1,75 @@
+target/
+!**/src/main/**/target/
+!**/src/test/**/target/
+.kotlin
+
+### IntelliJ IDEA ###
+.idea/modules.xml
+.idea/jarRepositories.xml
+.idea/compiler.xml
+.idea/libraries/
+*.iws
+*.iml
+*.ipr
+Thumbs.db
+
+### Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+### Mac OS ###
+.DS_Store
+
+# ==========================================
+# 1. Next.js & Node.js (Frontend)
+# ==========================================
+node_modules/
+.next/
+out/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.turbo/
+
+# ==========================================
+# 2. Java Servlet & Build Tools (Backend)
+# ==========================================
+bin/
+*.class
+*.war
+*.ear
+.gradle/
+
+# ==========================================
+# 3. Environment Files & Git Exceptions
+# ==========================================
+# Block all JARs except the Maven wrapper
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# Block specific secret files
+.env
+.env*.local
+config.properties
+
+# DO NOT block template files
+!.env.example
+!config.properties.example
