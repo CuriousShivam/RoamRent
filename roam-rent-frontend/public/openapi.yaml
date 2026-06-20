@@ -1,0 +1,629 @@
+openapi: 3.0.0
+info:
+  title: Roam Rent API Documentation
+  description: Backend REST API endpoints for the Roam Rent car rental platform, serving a Next.js frontend application.
+  version: 1.1.0
+servers:
+  - url: http://localhost:8080/api
+    description: Local Apache Tomcat Development Server
+
+paths:
+  /auth/signup:
+    post:
+      summary: Register a new user account
+      description: Creates a new user profile (Customer or Driver) inside the PostgreSQL database.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+                - password
+                - phone
+                - role
+                - city
+                - state
+              properties:
+                name:
+                  type: string
+                  example: "Shivam Kumar"
+                email:
+                  type: string
+                  example: "shivam@example.com"
+                password:
+                  type: string
+                  example: "mySecurePassword123"
+                phone:
+                  type: string
+                  example: "9876543210"
+                role:
+                  type: string
+                  enum: [ CUSTOMER, DRIVER ]
+                  example: "CUSTOMER"
+                address:
+                  type: string
+                  example: "123 Street Block"
+                city:
+                  type: string
+                  example: "Delhi"
+                state:
+                  type: string
+                  example: "Delhi"
+      responses:
+        '201':
+          description: User registered successfully!
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StandardResponse'
+        '400':
+          description: Missing required profile fields.
+        '409':
+          description: Email profile is already registered.
+
+  /auth/login:
+    post:
+      summary: Authenticate an existing user
+      description: Verifies user credentials and returns account details (excluding the password) upon success.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  example: "shivam@example.com"
+                password:
+                  type: string
+                  example: "mySecurePassword123"
+      responses:
+        '200':
+          description: Login successful!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Login successful!"
+                  data:
+                    $ref: '#/components/schemas/UserObject'
+        '401':
+          description: Invalid email or incorrect password attempt.
+
+  /vehicle/register:
+    post:
+      summary: Register a new vehicle
+      description: Adds a new car to the database linked to an active driver account profile.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - ownerId
+                - company
+                - model
+                - licensePlate
+                - seatingCapacity
+              properties:
+                ownerId:
+                  type: integer
+                  format: int64
+                  example: 1
+                company:
+                  type: string
+                  example: "Maruti Suzuki"
+                model:
+                  type: string
+                  example: "Ertiga"
+                licensePlate:
+                  type: string
+                  example: "DL3C-XX-1234"
+                seatingCapacity:
+                  type: integer
+                  example: 7
+      responses:
+        '201':
+          description: Vehicle registered successfully!
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StandardResponse'
+        '400':
+          description: Missing required vehicle data fields.
+        '409':
+          description: This license plate number is already registered.
+
+  /trip/create:
+    post:
+      summary: Raise a new travel trip request
+      description: Enables logged-in customers to post travel booking configurations into the PostgreSQL datastore.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - customerId
+                - pickupAddress
+                - pickupCity
+                - pickupState
+                - destinationAddress
+                - destinationCity
+                - destinationState
+                - passengerCount
+                - travelDatetime
+              properties:
+                customerId:
+                  type: integer
+                  format: int64
+                  example: 2
+                pickupAddress:
+                  type: string
+                  example: "Flat 405, Sonia Vihar"
+                pickupCity:
+                  type: string
+                  example: "Delhi"
+                pickupState:
+                  type: string
+                  example: "Delhi"
+                destinationAddress:
+                  type: string
+                  example: "Taj Mahal East Gate"
+                destinationCity:
+                  type: string
+                  example: "Agra"
+                destinationState:
+                  type: string
+                  example: "Uttar Pradesh"
+                isRoundTrip:
+                  type: boolean
+                  default: false
+                  example: true
+                passengerCount:
+                  type: integer
+                  minimum: 1
+                  example: 4
+                travelDatetime:
+                  type: string
+                  description: "Planned date-time. Format configured using backend GSON custom layout parameters."
+                  example: "2026-06-25 08:30:00"
+      responses:
+        '201':
+          description: Trip request raised successfully!
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StandardResponse'
+        '400':
+          description: Validation failure. Missing fields or passenger count is 0 or less.
+        '500':
+          description: Database execution failure.
+
+  /offer/submit:
+    post:
+      summary: Submit a driver price bid for a trip
+      description: Allows independent drivers to post a custom pricing offer for an open customer trip request. The operation checks that the trip request is still active and pending before processing.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - requestId
+                - driverId
+                - carId
+                - offeredPrice
+              properties:
+                requestId:
+                  type: integer
+                  format: int64
+                  description: "The primary key ID of the customer's active trip request."
+                  example: 1
+                driverId:
+                  type: integer
+                  format: int64
+                  description: "The primary key ID of the driver submitting the custom quote."
+                  example: 5
+                carId:
+                  type: integer
+                  format: int64
+                  description: "The primary key ID of the specific vehicle allocated for this travel route."
+                  example: 3
+                offeredPrice:
+                  type: number
+                  format: float
+                  description: "The total rental charge quote for the entire route trip. Must be greater than 0.00."
+                  example: 4500.50
+      responses:
+        '201':
+          description: Your pricing offer was successfully submitted!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Your pricing offer was successfully submitted!"
+        '400':
+          description: Validation failure. Missing mandatory payload items or offeredPrice is 0 or less.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Offered price must be greater than 0.00"
+        '409':
+          description: Duplicate attempt error. The driver has already submitted a bid for this specific trip request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "You have already submitted a price bid for this trip request."
+        '410':
+          description: Request Expired. The target trip request status is no longer set to 'PENDING'.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Cannot submit offer. This trip request is no longer active or pending."
+        '500':
+          description: Database operation processing failure.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Database failed to process your bid."
+
+  /customer/offers:
+    get:
+      summary: Retrieve driver bids for a specific trip request
+      description: Fetches all active pricing bids submitted by drivers for a customer's specific trip request, sorted from lowest price to highest price. Includes driver name, contact info, and car details.
+      parameters:
+        - name: requestId
+          in: query
+          required: true
+          description: "The primary key ID of the customer's trip request."
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      responses:
+        '200':
+          description: A list of active driver bids retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OfferResponseObject'
+        '400':
+          description: Missing or invalid requestId query parameter structure.
+        '500':
+          description: Database operation failure.
+
+  /driver/dashboard:
+    get:
+      summary: Retrieve matched trip requests for a driver
+      description: Fetches a dynamic list of active, pending customer trip requests that match the logged-in driver's registered city/state location and satisfy their vehicle's seating capacity rules.
+      parameters:
+        - name: driverId
+          in: query
+          required: true
+          description: "The primary key identifier ID of the logged-in driver account."
+          schema:
+            type: integer
+            format: int64
+          example: 8
+      responses:
+        '200':
+          description: A matching list of pending trip requests retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TripRequestObject'
+        '400':
+          description: Missing or invalid driverId parameter formatting structure.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Missing required driverId parameter"
+        '500':
+          description: Database operation or runtime server processing failure.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Failed to retrieve dashboard feeds"
+
+  /booking/accept:
+    post:
+      summary: Confirm a driver offer and finalize a booking
+      description: Allows a customer to accept a specific driver's pricing offer. This triggers an atomic database transaction that updates the trip status, accepts the driver's offer, and logs a fresh confirmation inside the bookings registry.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - requestId
+                - offerId
+              properties:
+                requestId:
+                  type: integer
+                  format: int64
+                  description: "The unique identifier ID of the customer's active trip request."
+                  example: 12
+                offerId:
+                  type: integer
+                  format: int64
+                  description: "The unique identifier ID of the specific driver pricing offer being accepted."
+                  example: 1
+      responses:
+        '201':
+          description: Trip successfully booked and scheduled!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Trip successfully booked and scheduled!"
+        '400':
+          description: Validation failure. Missing mandatory payload reference parameters.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Missing required booking reference parameters"
+        '409':
+          description: Conflict error. This trip request or driver offer has already been locked into another confirmation record.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "This trip or offer has already been confirmed."
+        '410':
+          description: Gone error. The trip request status is no longer open or set to PENDING.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "This ride request is no longer open for booking."
+        '500':
+          description: Database transaction rollback or system query failure.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Database failed to finalize booking."
+
+
+components:
+  schemas:
+    OfferResponseObject:
+      type: object
+      properties:
+        offerId:
+          type: integer
+          format: int64
+          example: 1
+        requestId:
+          type: integer
+          format: int64
+          example: 1
+        offeredPrice:
+          type: number
+          format: float
+          example: 4500.50
+        offerStatus:
+          type: string
+          example: "SENT"
+        createdAt:
+          type: string
+          example: "2026-06-19 21:50:00"
+        driverId:
+          type: integer
+          format: int64
+          example: 5
+        driverName:
+          type: string
+          example: "Amit Singh"
+        driverPhone:
+          type: string
+          example: "9811122233"
+        carCompany:
+          type: string
+          example: "Maruti Suzuki"
+        carModel:
+          type: string
+          example: "Ertiga"
+
+    StandardResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Operation processed successfully"
+
+    UserObject:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+          example: "Shivam Kumar"
+        email:
+          type: string
+          example: "shivam@example.com"
+        phone:
+          type: string
+          example: "9876543210"
+        role:
+          type: string
+          example: "CUSTOMER"
+        address:
+          type: string
+          example: "123 Street Block"
+        city:
+          type: string
+          example: "Delhi"
+        state:
+          type: string
+          example: "Delhi"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-05-22T11:24:53.000Z"
+
+    TripRequestObject:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: "The unique primary key ID of the trip request."
+          example: 12
+        customerId:
+          type: integer
+          format: int64
+          description: "The primary key ID of the customer who posted the trip request."
+          example: 2
+        pickupAddress:
+          type: string
+          description: "Detailed door number, street, or landmark layout name for the start point."
+          example: "Flat 405, Sonia Vihar"
+        pickupCity:
+          type: string
+          description: "The city where the trip pickup begins."
+          example: "Delhi"
+        pickupState:
+          type: string
+          description: "The state where the trip pickup begins."
+          example: "Delhi"
+        destinationAddress:
+          type: string
+          description: "Detailed destination building or drop-off location address."
+          example: "Taj Mahal East Gate"
+        destinationCity:
+          type: string
+          description: "Target destination city."
+          example: "Agra"
+        destinationState:
+          type: string
+          description: "Target destination state."
+          example: "Uttar Pradesh"
+        isRoundTrip:
+          type: boolean
+          description: "Flag specifying if the customer requires a return trip arrangement."
+          example: true
+        passengerCount:
+          type: integer
+          description: "Number of passengers traveling."
+          example: 4
+        travelDatetime:
+          type: string
+          description: "The planned travel date-time formatted as a string matching backend GSON settings."
+          example: "2026-06-25 08:30:00"
+        status:
+          type: string
+          description: "Current workflow state of the trip."
+          enum: [ PENDING, ACCEPTED, EXPIRED, CANCELLED ]
+          example: "PENDING"
+        createdAt:
+          type: string
+          description: "Timestamp showing exactly when the request was posted into the system."
+          example: "2026-06-19 21:38:00"
