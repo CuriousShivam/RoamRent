@@ -44,6 +44,7 @@ public class MyDB {
 
     // This method now borrows a connection instantly from the pool
     public static Connection getConnection() throws SQLException {
+        System.out.println("Connecting to DB...");
         return dataSource.getConnection();
     }
 }
