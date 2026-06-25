@@ -1,6 +1,6 @@
 import Link from 'next/link';
+import GoogleButton from './components/GoogleAuthBtn'; // Import our new client buttons
 
-// 1. Define SEO Metadata for Roam Rent
 export const metadata = {
     title: 'Roam Rent | Affordable Car Rentals & Driver Bidding Platform',
     description: 'Book long trips or rent out your car on Roam Rent. Customers post trip details, local car owners offer bids, and you pick the best rental price!',
@@ -22,15 +22,14 @@ export default function LandingPage() {
                             How It Works
                         </Link>
                         <div className="h-4 w-px bg-slate-200"></div>
-                        <Link href="#auth-section" className="rounded-full bg-blue-600 px-5 py-2 text-sm font-semibold text-white shadow-md shadow-blue-200 hover:bg-blue-700 hover:shadow-none transition">
-                            Get Started
-                        </Link>
+                        {/* Server component embedding a specific navbar click variant */}
+                        <GoogleButton variant="navbar" />
                     </nav>
                 </div>
             </header>
 
             <main>
-                {/* --- HERO HERO SECTION --- */}
+                {/* --- HERO SECTION --- */}
                 <section className="mx-auto max-w-7xl px-4 py-16 text-center sm:px-6 sm:py-24 lg:px-8">
                     <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-6xl">
                         Your Journey. Your Price.<br />
@@ -39,24 +38,20 @@ export default function LandingPage() {
             </span>
                     </h1>
                     <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-600 sm:text-xl">
-                        Roam Rent connects travelers with local car owners. Post your destination, receive live price bids from drivers, and pick the perfect deal that fits your wallet.
+                        Roam Rent connects travelers with local car owners. Authenticate instantly with Google, finalize your profile config, and take control of your travels.
                     </p>
-                    <div className="mt-10 flex justify-center gap-4">
-                        <Link href="#auth-section" className="rounded-xl bg-blue-600 px-8 py-4 text-base font-bold text-white shadow-xl shadow-blue-200 hover:bg-blue-700 transition">
-                            Book a Ride
-                        </Link>
-                        <Link href="#auth-section" className="rounded-xl bg-white border border-slate-300 px-8 py-4 text-base font-bold text-slate-700 shadow-sm hover:bg-slate-50 transition">
-                            List Your Car
-                        </Link>
+                    <div className="mt-10 flex justify-center max-w-[280px] mx-auto">
+                        {/* Standard main card variant button injection */}
+                        <GoogleButton variant="card" />
                     </div>
                 </section>
 
-                {/* --- HOW IT WORKS SECTION (SEO Rich Keyword Text) --- */}
+                {/* --- HOW IT WORKS SECTION --- */}
                 <section id="how-it-works" className="border-t border-slate-200 bg-white py-16 sm:py-24">
                     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                         <div className="text-center">
                             <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">How Roam Rent Works</h2>
-                            <p className="mt-4 text-slate-600">A decentralized, fair car rental ecosystem designed for everyone.</p>
+                            <p className="mt-4 text-slate-600">A fair, secure car rental ecosystem designed for everyone.</p>
                         </div>
 
                         <div className="mt-16 grid gap-12 sm:grid-cols-2 lg:gap-16">
@@ -65,10 +60,9 @@ export default function LandingPage() {
                                 <div className="text-3xl">🧳</div>
                                 <h3 className="mt-4 text-xl font-bold text-slate-900">For Customers</h3>
                                 <ul className="mt-4 space-y-3 text-slate-600 text-sm">
-                                    <li className="flex items-start gap-2">🔹 <span>Register securely on the web application.</span></li>
-                                    <li className="flex items-start gap-2">🔹 <span>Raise a trip request by typing your pickup address, destination, passenger counts, and travel date timings.</span></li>
-                                    <li className="flex items-start gap-2">🔹 <span>Receive dynamic competitive rental price offers straight from local vehicle owners.</span></li>
-                                    <li className="flex items-start gap-2">🔹 <span>Confirm the best offer to instantly lock and schedule your upcoming trip dashboard tracking.</span></li>
+                                    <li className="flex items-start gap-2">🔹 <span>Authenticate safely using your standard Google Account.</span></li>
+                                    <li className="flex items-start gap-2">🔹 <span>Complete your required profile parameters (Role, City, Phone) once.</span></li>
+                                    <li className="flex items-start gap-2">🔹 <span>Raise trip requests and review competing cash offers from verified local drivers.</span></li>
                                 </ul>
                             </div>
 
@@ -77,46 +71,36 @@ export default function LandingPage() {
                                 <div className="text-3xl">🔑</div>
                                 <h3 className="mt-4 text-xl font-bold text-slate-900">For Car Owners & Drivers</h3>
                                 <ul className="mt-4 space-y-3 text-slate-600 text-sm">
-                                    <li className="flex items-start gap-2">🔸 <span>Create your driver profile and list your vehicle assets along with total seating capacities.</span></li>
-                                    <li className="flex items-start gap-2">🔸 <span>View matched passenger travel requests originating strictly in your same city or same state.</span></li>
-                                    <li className="flex items-start gap-2">🔸 <span>Submit custom rental price bids (Rent for trip) matching what you want to earn.</span></li>
-                                    <li className="flex items-start gap-2">🔸 <span>Win bookings and view verified upcoming travel rosters instantly on your driver screen panels.</span></li>
+                                    <li className="flex items-start gap-2">🔸 <span>Log in with Google and activate your custom profile.</span></li>
+                                    <li className="flex items-start gap-2">🔸 <span>List your vehicles and access open ride requests in your city.</span></li>
+                                    <li className="flex items-start gap-2">🔸 <span>Submit custom price bids to win travel rosters directly.</span></li>
                                 </ul>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                {/* --- DUAL LOGIN & SIGNUP ACTION PANEL SECTION --- */}
+                {/* --- GOOGLE SIGN IN ACTION BANNER --- */}
                 <section id="auth-section" className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
-                    <div className="rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950 to-blue-950 p-8 text-center text-white shadow-2xl sm:p-16">
-                        <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Ready to join Roam Rent?</h2>
-                        <p className="mx-auto mt-4 max-w-xl text-indigo-200">
-                            Create an account or login below to enter your customized dashboard interface panel.
+                    <div className="rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950 to-blue-950 p-8 text-center text-white shadow-2xl sm:p-16 relative overflow-hidden">
+                        <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] bg-blue-600/10 rounded-full blur-[100px] pointer-events-none"></div>
+
+                        <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl relative z-10">Ready to join Roam Rent?</h2>
+                        <p className="mx-auto mt-4 max-w-md text-indigo-200 relative z-10">
+                            Access your personalized workspace hub securely. New users will be automatically routed to finalize registration steps.
                         </p>
 
-                        <div className="mt-10 grid gap-4 max-w-md mx-auto sm:grid-cols-2">
-                            <div className="rounded-2xl bg-white/10 border border-white/10 p-6 backdrop-blur-sm">
-                                <h3 className="text-lg font-bold mb-4">New to the platform?</h3>
-                                <Link href="/roam-rent-frontend/app/register" className="block w-full text-center rounded-xl bg-blue-600 py-3 text-sm font-bold text-white shadow-md hover:bg-blue-500 transition">
-                                    Create Account
-                                </Link>
-                            </div>
-
-                            <div className="rounded-2xl bg-white/10 border border-white/10 p-6 backdrop-blur-sm">
-                                <h3 className="text-lg font-bold mb-4">Returning user?</h3>
-                                <Link href="/login" className="block w-full text-center rounded-xl bg-white py-3 text-sm font-bold text-slate-900 shadow-md hover:bg-slate-100 transition">
-                                    Log In
-                                </Link>
-                            </div>
+                        <div className="mt-10 max-w-sm mx-auto relative z-10 bg-white/5 border border-white/10 p-8 rounded-2xl backdrop-blur-md">
+                            {/* Inject the secondary card component loader */}
+                            <GoogleButton variant="card" />
                         </div>
+
                     </div>
                 </section>
             </main>
 
-            {/* --- FOOTER BANNER SECTION --- */}
             <footer className="border-t border-slate-200 bg-white py-8 text-center text-xs text-slate-500">
-                <p>© 2026 Roam Rent Platform Ecosystem. All Rights Reserved. Master built using Java Servlets, Next.js, and PostgreSQL.</p>
+                <p>© 2026 Roam Rent Platform Ecosystem. All Rights Reserved.</p>
             </footer>
 
         </div>

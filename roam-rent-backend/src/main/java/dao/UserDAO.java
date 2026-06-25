@@ -70,4 +70,32 @@ public class UserDAO {
         }
         return null; // Return null if the user account is not found
     }
+
+    public User getUserByOAuth(String provider, String oauthId) {
+        String sql = "SELECT * FROM users WHERE oauth_provider = ? AND oauth_id = ?";
+        try (Connection conn = config.MyDB.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, "GOOGLE");
+            stmt.setString(2, oauthId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    User user = new User();
+                    user.setId(rs.getLong("id"));
+                    user.setName(rs.getString("name"));
+                    user.setEmail(rs.getString("email"));
+                    user.setPhone(rs.getString("phone"));
+                    user.setRole(rs.getString("role"));
+                    user.setAddress(rs.getString("address"));
+                    user.setCity(rs.getString("city"));
+                    user.setState(rs.getString("state"));
+                    return user;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

@@ -136,6 +136,7 @@ export default function RegisterPage() {
 
         </form>
       </div>
+      <a href={`${process.env.NEXT_PUBLIC_BACKEND_URL}/login`}>Google Login Form</a>
     </div>
   );
 }
