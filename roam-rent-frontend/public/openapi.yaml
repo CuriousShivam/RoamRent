@@ -8,100 +8,107 @@ servers:
     description: Local Apache Tomcat Development Server
 
 paths:
-  /auth/signup:
-    post:
-      summary: Register a new user account
-      description: Creates a new user profile (Customer or Driver) inside the PostgreSQL database.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - name
-                - email
-                - password
-                - phone
-                - role
-                - city
-                - state
-              properties:
-                name:
-                  type: string
-                  example: "Shivam Kumar"
-                email:
-                  type: string
-                  example: "shivam@example.com"
-                password:
-                  type: string
-                  example: "mySecurePassword123"
-                phone:
-                  type: string
-                  example: "9876543210"
-                role:
-                  type: string
-                  enum: [ CUSTOMER, DRIVER ]
-                  example: "CUSTOMER"
-                address:
-                  type: string
-                  example: "123 Street Block"
-                city:
-                  type: string
-                  example: "Delhi"
-                state:
-                  type: string
-                  example: "Delhi"
+  /accounts.google.com/o/oauth2/auth:
+    get:
+      summary: SignUp and Login Users
+      description: Providing Client Id, Redirect url and required key value pairs, above URL will get us to the OAuth consent page for user authentication and authorization code. After getting authorization code, redirect url(of backend) will be called with authorization code which will exchange this code for Id tokens through which we get users Email and name. This email and name is used to initiate a new user or login an existing user.
       responses:
-        '201':
-          description: User registered successfully!
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/StandardResponse'
-        '400':
-          description: Missing required profile fields.
-        '409':
-          description: Email profile is already registered.
-
-  /auth/login:
-    post:
-      summary: Authenticate an existing user
-      description: Verifies user credentials and returns account details (excluding the password) upon success.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - email
-                - password
-              properties:
-                email:
-                  type: string
-                  example: "shivam@example.com"
-                password:
-                  type: string
-                  example: "mySecurePassword123"
-      responses:
-        '200':
-          description: Login successful!
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  message:
-                    type: string
-                    example: "Login successful!"
-                  data:
-                    $ref: '#/components/schemas/UserObject'
-        '401':
-          description: Invalid email or incorrect password attempt.
+        '302':
+          description: (Redirect) If a user exist with complete profile, then they will be redirect to the dashboard page, else they will be redirected to the /complete-profile route with a session cookie containing UserId, Email, Role as data
+#  /auth/signup:
+#    post:
+#      summary: Register a new user account
+#      description: Creates a new user profile (Customer or Driver) inside the PostgreSQL database.
+#      requestBody:
+#        required: true
+#        content:
+#          application/json:
+#            schema:
+#              type: object
+#              required:
+#                - name
+#                - email
+#                - password
+#                - phone
+#                - role
+#                - city
+#                - state
+#              properties:
+#                name:
+#                  type: string
+#                  example: "Shivam Kumar"
+#                email:
+#                  type: string
+#                  example: "shivam@example.com"
+#                password:
+#                  type: string
+#                  example: "mySecurePassword123"
+#                phone:
+#                  type: string
+#                  example: "9876543210"
+#                role:
+#                  type: string
+#                  enum: [ CUSTOMER, DRIVER ]
+#                  example: "CUSTOMER"
+#                address:
+#                  type: string
+#                  example: "123 Street Block"
+#                city:
+#                  type: string
+#                  example: "Delhi"
+#                state:
+#                  type: string
+#                  example: "Delhi"
+#      responses:
+#        '201':
+#          description: User registered successfully!
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/StandardResponse'
+#        '400':
+#          description: Missing required profile fields.
+#        '409':
+#          description: Email profile is already registered.
+#
+#  /auth/login:
+#    post:
+#      summary: Authenticate an existing user
+#      description: Verifies user credentials and returns account details (excluding the password) upon success.
+#      requestBody:
+#        required: true
+#        content:
+#          application/json:
+#            schema:
+#              type: object
+#              required:
+#                - email
+#                - password
+#              properties:
+#                email:
+#                  type: string
+#                  example: "shivam@example.com"
+#                password:
+#                  type: string
+#                  example: "mySecurePassword123"
+#      responses:
+#        '200':
+#          description: Login successful!
+#          content:
+#            application/json:
+#              schema:
+#                type: object
+#                properties:
+#                  success:
+#                    type: boolean
+#                    example: true
+#                  message:
+#                    type: string
+#                    example: "Login successful!"
+#                  data:
+#                    $ref: '#/components/schemas/UserObject'
+#        '401':
+#          description: Invalid email or incorrect password attempt.
 
   /vehicle/register:
     post:

@@ -13,7 +13,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
 
-@WebServlet("/api/auth/me")
+@WebServlet("/api/v1/auth/me")
 public class MeServlet extends HttpServlet {
 
     private final SessionDAO sessionDAO = new SessionDAO();
@@ -54,7 +54,7 @@ public class MeServlet extends HttpServlet {
         }
 
         // Pull active user session meta out of Upstash Redis
-        Map<String, String> sessionData = sessionDAO.getSession(sessionId);
+        Map<String, String> sessionData = sessionDAO.getSessionData(sessionId);
         if (sessionData == null) {
             ResponseUtil.sendJson(resp, HttpServletResponse.SC_UNAUTHORIZED, "Session expired", null);
             return;

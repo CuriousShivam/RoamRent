@@ -11,8 +11,8 @@ const onboardingSchema = z.object({
         .max(100, { message: "Name cannot exceed 100 characters." })
         .refine((val) => val.trim().length > 0, { message: "Name cannot be empty spaces." }),
 
-    role: z.enum(["CUSTOMER", "DRIVER"], {
-        errorMap: () => ({ message: "Please select a valid usage role option." })
+    role: z.enum(["CUSTOMER", "OWNER"], {
+        error: () => ({ message: "Please select a valid usage role option." })
     }),
 
     phone: z.string()
@@ -53,7 +53,7 @@ export default function CompleteProfilePage() {
     useEffect(() => {
         const fetchSessionData = async () => {
             try {
-                const response = await fetch("http://localhost:8080/api/auth/me", {
+                const response = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "/api/auth/me", {
                     method: "GET",
                     credentials: "include"
                 });
@@ -74,21 +74,21 @@ export default function CompleteProfilePage() {
         fetchSessionData();
     }, [router]);
 
-    const handleChange = (e) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    const handleOnboardingSubmit = async (e) => {
+    const handleOnboardingSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
         setMessage({ text: "", isError: false });
 
         // 3. Trigger Zod Parsing Schema Verification Checks
         const validationResult = onboardingSchema.safeParse(formData);
-        console.log(validationResult);
+
         if (!validationResult.success) {
             // Extract the first explicit error message string produced by Zod rules mapping
-            const firstErrorMessage = validationResult.error[0].message;
+            const firstErrorMessage = JSON.parse(validationResult.error.message)[0].message;
             setMessage({ text: firstErrorMessage, isError: true });
             return; // Terminate execution early before firing network requests
         }
@@ -96,9 +96,10 @@ export default function CompleteProfilePage() {
         setLoading(true);
 
         try {
-            const response = await fetch("http://localhost:8080/api/user/complete-profile", {
+            const response = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "/api/user/complete-profile", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
+                credentials: "include",
                 body: JSON.stringify({
                     // Use clean, safely validated data outputs straight out of Zod parser
                     name: validationResult.data.name.trim(),
@@ -120,7 +121,7 @@ export default function CompleteProfilePage() {
                 localStorage.setItem("user_name", validationResult.data.name.trim());
 
                 setTimeout(() => {
-                    if (formData.role === "DRIVER") {
+                    if (formData.role === "OWNER") {
                         router.push("/driver");
                     } else {
                         router.push("/customer");
@@ -160,7 +161,7 @@ export default function CompleteProfilePage() {
                         <span className="text-blue-400">{profile.name}!</span>
                     </h1>
                     <p className="text-xs text-slate-400 leading-relaxed max-w-xs">
-                        We managed to sync your identity details securely using your Google Account ({profile.email}). Let's get your profile finalized.
+                        We managed to sync your identity details securely using your Google Account ({profile.email}). Let&#39;s get your profile finalized.
                     </p>
                 </div>
 
@@ -199,8 +200,8 @@ export default function CompleteProfilePage() {
                                 <button
                                     type="button"
                                     title="Driver"
-                                    className={`py-3.5 text-xs font-bold rounded-xl border transition-all ${formData.role === "DRIVER" ? "bg-slate-900 border-slate-900 text-white shadow-md shadow-slate-900/10" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"}`}
-                                    onClick={() => setFormData((prev) => ({ ...prev, role: "DRIVER" }))}
+                                    className={`py-3.5 text-xs font-bold rounded-xl border transition-all ${formData.role === "OWNER" ? "bg-slate-900 border-slate-900 text-white shadow-md shadow-slate-900/10" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"}`}
+                                    onClick={() => setFormData((prev) => ({ ...prev, role: "OWNER" }))}
                                 >
                                     🚗 List My Vehicle for Rent
                                 </button>

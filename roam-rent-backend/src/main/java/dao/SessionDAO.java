@@ -2,7 +2,12 @@ package dao;
 
 import com.google.gson.Gson;
 import config.RedisConfig;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import redis.clients.jedis.RedisClient;
+
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -57,15 +62,17 @@ public class SessionDAO {
     }
 
     // 2. Extract active key payload strings
-    public Map<String, String> getSession(String sessionId) {
+    public Map<String, String> getSessionData(String sessionId) {
         String jsonPayload = getClient().get("session:" + sessionId);
         if (jsonPayload == null) return null;
+        // Explicitly declare the type to avoid Gson numeric parsing bugs
+        java.lang.reflect.Type type = new com.google.gson.reflect.TypeToken<Map<String, String>>(){}.getType();
         return gson.fromJson(jsonPayload, Map.class);
     }
 
     // 3. Rotate Session ID (Secures active data layers against cross-site hijacking leaks)
     public String rotateSession(String oldSessionId) {
-        Map<String, String> currentData = getSession(oldSessionId);
+        Map<String, String> currentData = getSessionData(oldSessionId);
         if (currentData == null) return null;
 
         // Revoke the old token address pointer reference completely
@@ -99,4 +106,27 @@ public class SessionDAO {
         }
         getClient().del(trackingKey); // Clear master indexing lookup keys
     }
+
+    //6. Read session id from Frontend
+    public String getSessionId(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        String sessionId = null;
+        // 1. Extract the ROAM_SESSION token from incoming request cookies
+        Cookie[] cookies = req.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("ROAM_SESSION".equals(cookie.getName())) {
+                    sessionId = cookie.getValue();
+                    break;
+                }
+            }
+        }
+
+        if (sessionId == null) {
+            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            resp.getWriter().write("{\"error\": \"Authentication cookie missing.\"}");
+            return null;
+        }
+        return sessionId;
+    }
+
 }

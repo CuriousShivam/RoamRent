@@ -21,8 +21,6 @@ public class ResponseUtil {
         resp.setCharacterEncoding("UTF-8");
 
         // Set CORS headers so your Next.js server (port 3000) can talk to Tomcat (port 8080)
-        resp.setHeader("Access-Control-Allow-Origin", FromENV.get("FRONTEND_URL"));
-        resp.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
         resp.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
         Map<String, Object> responseMap = new HashMap<>();

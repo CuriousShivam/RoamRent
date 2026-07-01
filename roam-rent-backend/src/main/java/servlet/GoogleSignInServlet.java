@@ -62,12 +62,6 @@ public class GoogleSignInServlet extends HttpServlet {
             String sessionId;
             String redirectURL;
             if (user == null) {
-
-                // Hydrate details with placeholders (User can update phone/address later inside Next.js settings)
-//                user = new User();
-//                user.setName(name);
-//                user.setEmail(email);
-
                 // Add the custom mapping logic
                 String sqlInsert = "INSERT INTO users (name, email, oauth_provider, oauth_id) VALUES ( ?, ?, 'GOOGLE', ?)";
                 try (java.sql.Connection conn = config.MyDB.getConnection();
@@ -86,12 +80,11 @@ public class GoogleSignInServlet extends HttpServlet {
                 redirectURL = "http://localhost:3000/complete-profile";
 
             }else{
-                System.out.println(user.getRole());
                 if(Objects.equals(user.getRole(), null)) {
                     redirectURL = "http://localhost:3000/complete-profile";
                     sessionId = sessionDAO.createSession(user.getId(), user.getEmail());
                 }else {
-                    if (Objects.equals(user.getRole(), "DRIVER")) {
+                    if (Objects.equals(user.getRole(), "OWNER")) {
                         redirectURL = "http://localhost:3000/driver";
                     }else{
                         redirectURL = "http://localhost:3000/customer";
@@ -108,7 +101,6 @@ public class GoogleSignInServlet extends HttpServlet {
 
             resp.addHeader("Set-Cookie", "ROAM_SESSION=" + sessionId + "; Path=/; Max-Age=21600; HttpOnly; SameSite=Lax");
             resp.sendRedirect(redirectURL);
-
 
         } catch (Exception e) {
             e.printStackTrace();

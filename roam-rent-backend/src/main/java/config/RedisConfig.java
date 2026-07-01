@@ -24,19 +24,15 @@ package config;
 
 import redis.clients.jedis.*;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
-import java.util.Properties;
 
 public class RedisConfig {
     private static final RedisClient redisClient;
 
     static {
-        // 1. Use the modern pool configuration wrapper
+        // 1. modern pool configuration wrapper
         ConnectionPoolConfig poolConfig = new ConnectionPoolConfig();
         poolConfig.setMaxTotal(64); // Maximum active concurrent sockets
         poolConfig.setMaxIdle(16);  // Maximum idle connection buffers
@@ -57,7 +53,7 @@ public class RedisConfig {
         String username = userInfo[0];
         String password = userInfo[1];
 
-        // 3. SECURE CONFIGURATION FIX: Map credentials and SSL inside the dedicated Client Config builder
+        // 3. Map credentials and SSL inside the dedicated Client Config builder
         JedisClientConfig clientConfig = DefaultJedisClientConfig.builder()
                 .user(username)
                 .password(password)
